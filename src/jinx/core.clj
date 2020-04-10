@@ -41,12 +41,17 @@
   (-> "https://worldtimeapi.org/api/timezone/"
       (str tz)
       fetch
-      :datetime))
+      :datetime
+      (subs 0 16)))
 
 
 (defn system-time
   [tz]
-  (str (LocalDateTime/now (ZoneId/of tz))))
+  (-> tz
+      ZoneId/of
+      LocalDateTime/now
+      str
+      (subs 0 16)))
 
 
 (defn estimate-remote-time-error
