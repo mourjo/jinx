@@ -1,5 +1,6 @@
 (ns jinx.core
-  (:require [cheshire.core :as cc])
+  (:require [cheshire.core :as cc]
+            [clj-http.client :as http])
   (:import java.time.ZoneId
            java.time.LocalDateTime))
 
@@ -8,13 +9,13 @@
   [url & {:keys [parser]
           :or {parser #(cc/parse-string % keyword)}}]
   (loop [i 0]
-    (Thread/sleep (* 100 i))
+    (Thread/sleep (* 500 i))
     (let [[code result] (try
-                        [::success
-                         (-> url slurp parser)]
-                        (catch Exception e
-                          [::failure
-                           e]))]
+                          [::success
+                           (-> url http/get :body parser)]
+                          (catch Exception e
+                            [::failure
+                             e]))]
       (cond
         (= code ::success) result
         (< i 5) (recur (inc i))

@@ -53,5 +53,5 @@
 
 (deftest ^:integration estimate-remote-time-error-test
   (is (pos? (estimate-remote-time-error)))
-  (is (pos? (estimate-remote-time-error 10)))
+  (is (pos? (estimate-remote-time-error 3)))
   (is (zero? (estimate-remote-time-error -4))))
