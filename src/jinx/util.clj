@@ -5,6 +5,7 @@
 (println "*** [SRC] Loading jinx.util ***")
 
 (defn fetch
+  "Make HTTP GET requests with backoff retries in case of errors."
   [url & {:keys [parser]
           :or {parser #(cc/parse-string % keyword)}}]
   (loop [i 0]

@@ -7,21 +7,26 @@
 
 
 (defn remote-timezones
+  "Fetch list of timezones from worldtimeapi.org."
   []
   (set (ju/fetch "https://worldtimeapi.org/api/timezone")))
 
 
 (defn remote-api-info
+  "Fetch API information from worldtimeapi.org."
   []
   (ju/fetch "http://worldtimeapi.org/api/" :parser identity))
 
 
 (defn system-timezones
+  "Set of timezones supported by the JVM."
   []
   (ZoneId/getAvailableZoneIds))
 
 
 (defn remote-time
+  "Check the time in a given timezone as reported by worldtimeapi.org
+  (precision upto minutes)."
   [tz]
   (-> "https://worldtimeapi.org/api/timezone/"
       (str tz)
@@ -31,6 +36,7 @@
 
 
 (defn system-time
+  "Current system time (precision upto minutes)."
   [tz]
   (-> tz
       ZoneId/of
@@ -40,6 +46,7 @@
 
 
 (defn estimate-remote-time-error
+  "Estimate the time spent in making network call to worldtimeapi.org."
   ([]
    (estimate-remote-time-error 5))
   ([n]
