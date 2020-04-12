@@ -1,4 +1,4 @@
-(ns jinx.util-test
+(ns ^:auxiliary jinx.util-test
   (:require [jinx.util :refer :all]
             [clojure.string :as cstring]
             [clojure.test :refer :all]))

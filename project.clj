@@ -10,6 +10,10 @@
   :repl-options {:init-ns jinx.core}
   :test-selectors {:default (complement :integration)
 
+                   :auxiliary :auxiliary
+
+                   :critical (every-pred :integration (complement :flaky))
+
                    :flaky :flaky
 
                    :only-name (fn [v & words]

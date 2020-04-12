@@ -57,7 +57,7 @@
   (is (valid-yaml? (remote-api-info))))
 
 
-(deftest ^:integration estimate-remote-time-error-test
+(deftest ^:auxiliary ^:integration estimate-remote-time-error-test
   (println "Running estimate-remote-time-error-test")
   (is (pos? (estimate-remote-time-error)))
   (is (pos? (estimate-remote-time-error 3)))
