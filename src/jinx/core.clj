@@ -1,35 +1,19 @@
 (ns jinx.core
-  (:require [cheshire.core :as cc]
-            [clj-http.client :as http])
+  (:require [jinx.util :as ju])
   (:import java.time.ZoneId
            java.time.LocalDateTime))
 
-
-(defn fetch
-  [url & {:keys [parser]
-          :or {parser #(cc/parse-string % keyword)}}]
-  (loop [i 0]
-    (Thread/sleep (* 500 i))
-    (let [[code result] (try
-                          [::success
-                           (-> url http/get :body parser)]
-                          (catch Exception e
-                            [::failure
-                             e]))]
-      (cond
-        (= code ::success) result
-        (< i 5) (recur (inc i))
-        :else (throw result)))))
+(println "*** [SRC] Loading jinx.core ***")
 
 
 (defn remote-timezones
   []
-  (set (fetch "https://worldtimeapi.org/api/timezone")))
+  (set (ju/fetch "https://worldtimeapi.org/api/timezone")))
 
 
 (defn remote-api-info
   []
-  (fetch "http://worldtimeapi.org/api/" :parser identity))
+  (ju/fetch "http://worldtimeapi.org/api/" :parser identity))
 
 
 (defn system-timezones
@@ -41,7 +25,7 @@
   [tz]
   (-> "https://worldtimeapi.org/api/timezone/"
       (str tz)
-      fetch
+      ju/fetch
       :datetime
       (subs 0 16)))
 

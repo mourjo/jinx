@@ -7,4 +7,52 @@
                  [cheshire "5.9.0"]
                  [clj-http "3.10.0"]
                  [com.fasterxml.jackson.dataformat/jackson-dataformat-yaml "2.9.2"]]
-  :repl-options {:init-ns jinx.core})
+  :repl-options {:init-ns jinx.core}
+  :test-selectors {:default (complement :integration)
+
+                   :flaky :flaky
+
+                   :only-name (fn [v & words]
+                                (some (fn [word]
+                                        (clojure.string/includes? (str (:name v))
+                                                                  (str word)))
+                                      words))
+
+                   :print-ns-meta [(fn [n & _]
+                                     (prn (type n) n)
+                                     true)
+                                   (constantly true)]
+
+                   :print-var-meta (fn [m & _]
+                                     (prn m)
+                                     true)
+
+                   :integration [(fn [ns & selector-args]
+                                   (or (empty? selector-args)
+                                       (some (fn [selector-arg]
+                                               (-> selector-arg
+                                                   str
+                                                   (clojure.string/split #"/" 2)
+                                                   first
+                                                   symbol
+                                                   (= ns)))
+                                             selector-args)))
+                                 (fn [m & selector-args]
+                                   (when (:integration m)
+                                     (or (empty? selector-args)
+                                         (some (fn [selector-arg]
+                                                 (let [a-var (str "#'" selector-arg)]
+                                                   (if (some #{\/} a-var)
+                                                     (= a-var (-> m :leiningen.test/var str))
+                                                     (= selector-arg (ns-name (:ns m))))))
+                                               selector-args))))]
+
+                   :integration-simple (fn [m & selector-args]
+                                         (when (:integration m)
+                                           (or (empty? selector-args)
+                                               (some (fn [selector-arg]
+                                                       (let [a-var (str "#'" selector-arg)]
+                                                         (if (some #{\/} a-var)
+                                                           (= a-var (-> m :leiningen.test/var str))
+                                                           (= selector-arg (ns-name (:ns m))))))
+                                                     selector-args))))})
