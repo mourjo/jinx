@@ -6,8 +6,11 @@
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [cheshire "5.9.0"]
                  [clj-http "3.10.0"]
-                 [com.fasterxml.jackson.dataformat/jackson-dataformat-yaml "2.9.2"]]
+                 [com.fasterxml.jackson.dataformat/jackson-dataformat-yaml "2.9.2"]
+                 [ring/ring-jetty-adapter "1.8.0"]
+                 [compojure "1.6.1"]]
   :repl-options {:init-ns jinx.core}
+  :jvm-opts ["-Dorg.eclipse.jetty.LEVEL=OFF"]
   :test-selectors {:default (complement :integration)
 
                    :auxiliary :auxiliary
@@ -30,6 +33,14 @@
                    :print-var-meta (fn [m & _]
                                      (prn m)
                                      true)
+
+                   :api-integration [(fn [namespc]
+                                       ;; select namespaces that start with jinx.api.*
+                                       (.startsWith (str namespc) "jinx.api."))
+
+                                     ;; in those namespaces, select the tests marked
+                                     ;; as ^:integration
+                                     :integration]
 
                    :integration [(fn [ns & selector-args]
                                    (or (empty? selector-args)
