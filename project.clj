@@ -25,14 +25,16 @@
                                                                   (str word)))
                                       words))
 
-                   :print-ns-meta [(fn [n & _]
-                                     (prn (type n) n)
-                                     true)
-                                   (constantly true)]
+                   :demo-ns-selector [(fn [n & _]
+                                        (println (format "Should I select this namespace?\n%s\n\n" (str n)))
+                                        true)
+                                      (fn [m & _]
+                                        (println (format "Should I select this var?\n%s\n\n" (str m)))
+                                        true)]
 
-                   :print-var-meta (fn [m & _]
-                                     (prn m)
-                                     true)
+                   :verbose (fn [m & _]
+                              (prn m)
+                              true)
 
                    :api-integration [(fn [namespc]
                                        ;; select namespaces that start with jinx.api.*
