@@ -19,21 +19,21 @@
 
                    :flaky :flaky
 
-                   :only-name (fn [v & words]
+                   :only-name (fn [var-metadata & words]
                                 (some (fn [word]
-                                        (clojure.string/includes? (str (:name v))
+                                        (clojure.string/includes? (str (:name var-metadata))
                                                                   (str word)))
                                       words))
 
-                   :demo-ns-selector [(fn [n & _]
-                                        (println (format "Should I select this namespace?\n%s\n\n" (str n)))
+                   :demo-ns-selector [(fn [namespc & _]
+                                        (println (format "Should I select this namespace?\n%s\n\n" (str namespc)))
                                         true)
-                                      (fn [m & _]
-                                        (println (format "Should I select this var?\n%s\n\n" (str m)))
+                                      (fn [var-metadata & _]
+                                        (println (format "Should I select this var?\n%s\n\n" (str var-metadata)))
                                         true)]
 
-                   :verbose (fn [m & _]
-                              (prn m)
+                   :verbose (fn [var-metadata & _]
+                              (prn var-metadata)
                               true)
 
                    :api-integration [(fn [namespc]
@@ -44,7 +44,17 @@
                                      ;; as ^:integration
                                      :integration]
 
-                   :integration [(fn [ns & selector-args]
+                   :integration [(fn [namespc & selector-args]
+                                   ;; Decide based on the command line arguments, whether the current
+                                   ;; namespace's tests should be run or not based on whether the current
+                                   ;; namespace is passed in as a command line argument or a var of the
+                                   ;; namespace is passed in as a command line argument (or run
+                                   ;; everything if nothing is passed). For this:
+                                   ;; lein test :integration jinx.core-test jinx.api.time-test/start-stop-server-test
+                                   ;; only jinx.core-test and jinx.api.time-test namespaces, this
+                                   ;; function will return true allowing only tests in these namespaces
+                                   ;; to be considered for running
+
                                    (or (empty? selector-args)
                                        (some (fn [selector-arg]
                                                (-> selector-arg
@@ -52,24 +62,29 @@
                                                    (clojure.string/split #"/" 2)
                                                    first
                                                    symbol
-                                                   (= ns)))
+                                                   (= namespc)))
                                              selector-args)))
-                                 (fn [m & selector-args]
-                                   (when (:integration m)
+                                 (fn [var-metadata & selector-args]
+                                   ;; Given a test var's metadata, decide whether this test var should be
+                                   ;; run or not. We look at the command line arguments and qualify only
+                                   ;; those vars that are mentioned in the command line (or all if
+                                   ;; nothing is mentioned).  Among those, only select the vars with the
+                                   ;; :integration metadata.
+                                   (when (:integration var-metadata)
                                      (or (empty? selector-args)
                                          (some (fn [selector-arg]
                                                  (let [a-var (str "#'" selector-arg)]
                                                    (if (some #{\/} a-var)
-                                                     (= a-var (-> m :leiningen.test/var str))
-                                                     (= selector-arg (ns-name (:ns m))))))
+                                                     (= a-var (-> var-metadata :leiningen.test/var str))
+                                                     (= selector-arg (ns-name (:ns var-metadata))))))
                                                selector-args))))]
 
-                   :integration-simple (fn [m & selector-args]
-                                         (when (:integration m)
+                   :integration-simple (fn [var-metadata & selector-args]
+                                         (when (:integration var-metadata)
                                            (or (empty? selector-args)
                                                (some (fn [selector-arg]
                                                        (let [a-var (str "#'" selector-arg)]
                                                          (if (some #{\/} a-var)
-                                                           (= a-var (-> m :leiningen.test/var str))
-                                                           (= selector-arg (ns-name (:ns m))))))
+                                                           (= a-var (-> var-metadata :leiningen.test/var str))
+                                                           (= selector-arg (ns-name (:ns var-metadata))))))
                                                      selector-args))))})
